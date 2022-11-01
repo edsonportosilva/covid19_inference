@@ -99,7 +99,7 @@ class RKIsituationreports(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format

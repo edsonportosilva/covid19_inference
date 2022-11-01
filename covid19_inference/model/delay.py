@@ -131,7 +131,7 @@ def delay_cases(
     model = modelcontext(model)
 
     # Define the shape of the delays i.e. seperate for different axes
-    shape_of_delays = (1,) if not seperate_on_axes else model.shape_of_regions
+    shape_of_delays = model.shape_of_regions if seperate_on_axes else (1, )
 
     # log normal distributed delays (the median values)
     delay_log = pm.Normal(
@@ -214,10 +214,9 @@ def _delay_lognormal(
         delay_mat = delay_mat[:, :, None]
     if input_arr.ndim == 3:
         delay_mat = delay_mat[:, :, None, None]
-    delayed_arr = _apply_delay(
+    return _apply_delay(
         input_arr, median_delay, scale_delay, delay_mat, use_gamma=use_gamma
     )
-    return delayed_arr
 
 
 def _delay_timeshift(new_I_t, len_new_I_t, len_out, delay, delay_diff):
@@ -255,8 +254,7 @@ def _delay_timeshift(new_I_t, len_new_I_t, len_out, delay, delay_diff):
     delay_mat = _make_delay_matrix(
         n_rows=len_new_I_t, n_columns=len_out, initial_delay=delay_diff
     )
-    inferred_cases = _interpolate(new_I_t, delay, delay_mat)
-    return inferred_cases
+    return _interpolate(new_I_t, delay, delay_mat)
 
 
 def _make_delay_matrix(n_rows, n_columns, initial_delay=0):

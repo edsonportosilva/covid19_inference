@@ -106,10 +106,7 @@ def SIR(
     if name_I_t is not None:
         pm.Deterministic(name_I_t, I_t)
 
-    if return_all:
-        return new_I_t, I_t, S_t
-    else:
-        return new_I_t
+    return (new_I_t, I_t, S_t) if return_all else new_I_t
 
 
 def SEIR(
@@ -242,16 +239,17 @@ def SEIR(
     if isinstance(pr_new_E_begin, tt.Variable):
         new_E_begin = pr_new_E_begin
     else:
-        if not model.is_hierarchical:
-            new_E_begin = pm.HalfCauchy(
-                name=name_new_E_begin, beta=pr_new_E_begin, shape=11
-            )
-        else:
-            new_E_begin = pm.HalfCauchy(
+        new_E_begin = (
+            pm.HalfCauchy(
                 name=name_new_E_begin,
                 beta=pr_new_E_begin,
                 shape=(11, model.shape_of_regions),
             )
+            if model.is_hierarchical
+            else pm.HalfCauchy(
+                name=name_new_E_begin, beta=pr_new_E_begin, shape=11
+            )
+        )
 
     # Prior distributions of starting populations (infectious, susceptibles)
     if isinstance(pr_I_begin, tt.Variable):
@@ -276,11 +274,7 @@ def SEIR(
         )
 
     # Choose transition rates (E to I) according to incubation period distribution
-    if not model.is_hierarchical:
-        x = np.arange(1, 11)
-    else:
-        x = np.arange(1, 11)[:, None]
-
+    x = np.arange(1, 11)[:, None] if model.is_hierarchical else np.arange(1, 11)
     beta = ut.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
 
     # Runs SEIR model:
@@ -345,10 +339,7 @@ def SEIR(
     if name_new_E_t is not None:
         pm.Deterministic(name_new_E_t, new_E_t)
 
-    if return_all:
-        return new_I_t, new_E_t, I_t, S_t
-    else:
-        return new_I_t
+    return (new_I_t, new_E_t, I_t, S_t) if return_all else new_I_t
 
 
 def kernelized_spread(
@@ -468,16 +459,17 @@ def kernelized_spread(
     if isinstance(pr_new_E_begin, tt.Variable):
         new_E_begin = pr_new_E_begin
     else:
-        if not model.is_hierarchical:
-            new_E_begin = pm.HalfCauchy(
-                name=name_new_E_begin, beta=pr_new_E_begin, shape=11
-            )
-        else:
-            new_E_begin = pm.HalfCauchy(
+        new_E_begin = (
+            pm.HalfCauchy(
                 name=name_new_E_begin,
                 beta=pr_new_E_begin,
                 shape=(11, model.shape_of_regions),
             )
+            if model.is_hierarchical
+            else pm.HalfCauchy(
+                name=name_new_E_begin, beta=pr_new_E_begin, shape=11
+            )
+        )
 
     S_begin = N - pm.math.sum(new_E_begin, axis=0)
 
@@ -494,11 +486,7 @@ def kernelized_spread(
         )
 
     # Choose transition rates (E to I) according to incubation period distribution
-    if not model.is_hierarchical:
-        x = np.arange(1, 11)
-    else:
-        x = np.arange(1, 11)[:, None]
-
+    x = np.arange(1, 11)[:, None] if model.is_hierarchical else np.arange(1, 11)
     beta = ut.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
 
     # Runs kernelized spread model:
@@ -542,10 +530,7 @@ def kernelized_spread(
     if name_new_E_t is not None:
         pm.Deterministic(name_new_E_t, new_E_t)
 
-    if return_all:
-        return new_I_t, new_E_t, S_t
-    else:
-        return new_I_t
+    return (new_I_t, new_E_t, S_t) if return_all else new_I_t
 
 
 def uncorrelated_prior_I(
@@ -834,10 +819,7 @@ def SIR_variants(
     if name_I_tv is not None:
         pm.Deterministic(name_I_tv, I_tv)
 
-    if return_all:
-        return new_I_tv, I_tv, S_t
-    else:
-        return new_I_tv
+    return (new_I_tv, I_tv, S_t) if return_all else new_I_tv
 
 
 def kernelized_spread_variants(
@@ -1047,10 +1029,7 @@ def kernelized_spread_variants(
     if name_new_E_tv is not None:
         pm.Deterministic(name_new_E_tv, new_E_tv)
 
-    if return_all:
-        return new_I_tv, new_E_tv, S_t
-    else:
-        return new_I_tv
+    return (new_I_tv, new_E_tv, S_t) if return_all else new_I_tv
 
 
 def kernelized_spread_gender(
@@ -1167,16 +1146,19 @@ def kernelized_spread_gender(
     if isinstance(pr_new_E_begin, tt.Variable):
         new_E_begin = pr_new_E_begin
     else:
-        if not model.is_hierarchical:
-            new_E_begin = pm.HalfCauchy(
-                name=name_new_E_begin, beta=pr_new_E_begin, shape=(11, num_gender)
-            )
-        else:
-            new_E_begin = pm.HalfCauchy(
+        new_E_begin = (
+            pm.HalfCauchy(
                 name=name_new_E_begin,
                 beta=pr_new_E_begin,
                 shape=(11, num_gender, model.shape_of_regions),
             )
+            if model.is_hierarchical
+            else pm.HalfCauchy(
+                name=name_new_E_begin,
+                beta=pr_new_E_begin,
+                shape=(11, num_gender),
+            )
+        )
 
     # shape: countries
     S_begin = N - pm.math.sum(new_E_begin, axis=(0, 1))
@@ -1195,11 +1177,7 @@ def kernelized_spread_gender(
         )
 
     # Choose transition rates (E to I) according to incubation period distribution
-    if not model.is_hierarchical:
-        x = np.arange(1, 11)
-    else:
-        x = np.arange(1, 11)[:, None]
-
+    x = np.arange(1, 11)[:, None] if model.is_hierarchical else np.arange(1, 11)
     beta = ut.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
 
     # Runs kernelized spread model:
@@ -1267,7 +1245,4 @@ def kernelized_spread_gender(
     if name_new_E_t is not None:
         pm.Deterministic(name_new_E_t, new_E_t)
 
-    if return_all:
-        return new_I_t, new_E_t, S_t
-    else:
-        return new_I_t
+    return (new_I_t, new_E_t, S_t) if return_all else new_I_t

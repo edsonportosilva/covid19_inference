@@ -92,7 +92,7 @@ def week_modulation(
         -------
         modulation
         """
-        offset_rad = pm.VonMises(name_offset_modulation + "_rad", mu=0, kappa=0.01)
+        offset_rad = pm.VonMises(f"{name_offset_modulation}_rad", mu=0, kappa=0.01)
         offset = pm.Deterministic(name_offset_modulation, offset_rad / (2 * np.pi) * 7)
         t = np.arange(shape_modulation[0]) - model.sim_begin.weekday()  # Sunday @ zero
         modulation = 1 - tt.abs_(tt.sin(t / 7 * np.pi + offset_rad / 2))
@@ -112,27 +112,29 @@ def week_modulation(
 
     elif not model.is_hierarchical:
         weekend_factor_log = pm.Normal(
-            name=name_weekend_factor + "_log",
+            name=f"{name_weekend_factor}_log",
             mu=tt.log(pr_mean_weekend_factor),
             sigma=pr_sigma_weekend_factor,
         )
+
         weekend_factor = tt.exp(weekend_factor_log)
         pm.Deterministic(name_weekend_factor, weekend_factor)
 
     else:  # hierarchical
         weekend_factor_L2_log, weekend_factor_L1_log = ut.hierarchical_normal(
-            name_L1=name_weekend_factor + "_hc_L1_log",
-            name_L2=name_weekend_factor + "_hc_L2_log",
-            name_sigma="sigma_" + name_weekend_factor,
+            name_L1=f"{name_weekend_factor}_hc_L1_log",
+            name_L2=f"{name_weekend_factor}_hc_L2_log",
+            name_sigma=f"sigma_{name_weekend_factor}",
             pr_mean=tt.log(pr_mean_weekend_factor),
             pr_sigma=pr_sigma_weekend_factor,
         )
 
+
         # We do that so we can use it later (same name as non hierarchical)
         weekend_factor_L1 = tt.exp(weekend_factor_L1_log)
         weekend_factor_L2 = tt.exp(weekend_factor_L2_log)
-        pm.Deterministic(name_weekend_factor + "_hc_L1", weekend_factor_L1)
-        pm.Deterministic(name_weekend_factor + "_hc_L2", weekend_factor_L2)
+        pm.Deterministic(f"{name_weekend_factor}_hc_L1", weekend_factor_L1)
+        pm.Deterministic(f"{name_weekend_factor}_hc_L2", weekend_factor_L2)
         weekend_factor = weekend_factor_L2
 
     # Different modulation types

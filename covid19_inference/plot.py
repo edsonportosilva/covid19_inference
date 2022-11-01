@@ -352,7 +352,7 @@ def timeseries_overview(
         ax.set_xlim(start, model.data_end)
         ax.yaxis.tick_right()
         ax.set_yscale("log")
-        if insets_only_two_ticks is True:
+        if insets_only_two_ticks:
             format_date_xticks(ax, minor=False)
             for label in ax.xaxis.get_ticklabels()[1:-1]:
                 label.set_visible(False)
@@ -362,10 +362,7 @@ def timeseries_overview(
             for label in ax.xaxis.get_ticklabels()[1:-1]:
                 label.set_visible(False)
 
-    # legend
-    leg_loc = "upper left"
-    if draw_insets == True:
-        leg_loc = "upper right"
+    leg_loc = "upper right" if draw_insets else "upper left"
     ax = axes[2]
     ax.legend(loc=leg_loc)
     ax.get_legend().get_frame().set_linewidth(0.0)
@@ -745,7 +742,7 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
         # panda date time frame cannot do np.median, which we need
         # data = pd.to_datetime(data, origin=model.sim_begin, unit="D")
         data = _days_to_mpl_dates(data, origin=model.sim_begin)
-    elif "weekend_factor_rad" == key:
+    elif key == "weekend_factor_rad":
         data = data / np.pi / 2 * 7
 
     ax.set_xlabel(_label_for_varname(key))
@@ -753,7 +750,7 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
 
     # sometimes the bins are spread over very different x-ranges
     bins = 50
-    if "lambda" in key or "mu" == key:
+    if "lambda" in key or key == "mu":
         bins = np.arange(0, 0.5 + 0.5 / bins, 0.5 / bins)
 
     # posteriors
@@ -768,10 +765,10 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
     )
 
     # xlim
-    if "lambda" in key or "mu" == key:
+    if "lambda" in key or key == "mu":
         ax.set_xlim(0, 0.5)
         ax.axvline(np.median(trace["mu"]), ls=":", color="black")
-    elif "I_begin" == key:
+    elif key == "I_begin":
         ax.set_xlim(0)
     elif "transient_len" in key:
         ax.set_xlim(0, 7)
@@ -798,7 +795,7 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
         if "transient_day" in key:
             # cast datetime.datetime from model to mpl date format
             x_for_pr = x_for_ax - mpl.dates.date2num(model.sim_begin)
-        if "weekend_factor_rad" == key:
+        if key == "weekend_factor_rad":
             x_for_ax *= np.pi * 2 / 7
 
         ax.plot(
@@ -813,7 +810,7 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
     # add the overlay with median and CI values. these are two strings
     text_md = ""
     text_ci = ""
-    if "lambda" in key or "mu" == key or "sigma_random_walk" == key:
+    if "lambda" in key or key == "mu" or key == "sigma_random_walk":
         text_md, text_ci = _string_median_CI(data, prec=2)
     elif "transient_day" in key:
         # convert median from mpl date into datetime to adjust by month
@@ -863,7 +860,7 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
     ax.set_rasterization_zorder(rcParams.rasterization_zorder)
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
-    if not "transient_day" in key:
+    if "transient_day" not in key:
         ax.locator_params(nbins=4)
 
 

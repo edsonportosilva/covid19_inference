@@ -19,8 +19,8 @@ _data_dir = None
 # provided with the module
 _data_dir_fallback = os.path.normpath(os.path.dirname(__file__) + "/../../data/")
 
-_format_date = lambda date_py: "{}/{}/{}".format(
-    date_py.month, date_py.day, str(date_py.year)[2:4]
+_format_date = (
+    lambda date_py: f"{date_py.month}/{date_py.day}/{str(date_py.year)[2:4]}"
 )
 
 
@@ -118,8 +118,9 @@ def iso_3166_get_country_name_from_alternative(alternative_name: str) -> str:
             if alt == alternative_name:
                 return country
     log.debug(
-        f"Alternative_name '{str(alternative_name)}' not found in iso convertion list!"
+        f"Alternative_name '{alternative_name}' not found in iso convertion list!"
     )
+
     return alternative_name
 
 
@@ -129,9 +130,7 @@ def iso_3166_country_in_iso_format(country: str) -> bool:
         data = json.load(open(this_dir + "/iso_countries.json", "r"))
     except Exception as e:
         data = json.load(open(_data_dir_fallback + "/iso_countries.json", "r"))
-    if country in data:
-        return True
-    return False
+    return country in data
 
 
 def backup_instances(
@@ -257,7 +256,7 @@ class Retrieval:
                 log.debug(f"Fallback {i} successful! {fallback}")
                 return True
             if len(self.fallbacks) == i + 1:
-                log.warning(f"ALL fallbacks failed! This should not happen!")
+                log.warning("ALL fallbacks failed! This should not happen!")
                 return False
 
             # ---------------------------------------------------------------#

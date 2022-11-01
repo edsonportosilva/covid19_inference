@@ -127,7 +127,7 @@ class Czechia(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -256,7 +256,7 @@ class Czechia(Retrieval):
         finally:
             # We save it to the local files
             # self.data._save_to_local()
-            log.info(f"Successfully downloaded new files.")
+            log.info("Successfully downloaded new files.")
 
     def _local_helper(self):
         """
@@ -271,7 +271,7 @@ class Czechia(Retrieval):
                 ],
                 **self.kwargs,
             )
-            log.info(f"Successfully loaded data from local")
+            log.info("Successfully loaded data from local")
             return True
         except Exception as e:
             log.info(f"Failed to load local files! {e} Trying fallbacks!")

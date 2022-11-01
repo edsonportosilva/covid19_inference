@@ -104,7 +104,7 @@ class FINANCIAL_TIMES(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -202,10 +202,7 @@ class FINANCIAL_TIMES(Retrieval):
         # Filter by value
         df = df[value]
 
-        # Filter by date
-        df = df[data_begin:data_end]
-
-        return df
+        return df[data_begin:data_end]
 
     def get_possible_countries_states(self):
         """

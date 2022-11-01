@@ -124,7 +124,7 @@ class JHU(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -194,15 +194,14 @@ class JHU(Retrieval):
             df["confirmed"] = self.confirmed.sum(axis=1, skipna=True)
             df["deaths"] = self.deaths.sum(axis=1, skipna=True)
             df["recovered"] = self.recovered.sum(axis=1, skipna=True)
+        elif state is None:
+            df["confirmed"] = self.confirmed[country].sum(axis=1, skipna=True)
+            df["deaths"] = self.deaths[country].sum(axis=1, skipna=True)
+            df["recovered"] = self.recovered[country].sum(axis=1, skipna=True)
         else:
-            if state is None:
-                df["confirmed"] = self.confirmed[country].sum(axis=1, skipna=True)
-                df["deaths"] = self.deaths[country].sum(axis=1, skipna=True)
-                df["recovered"] = self.recovered[country].sum(axis=1, skipna=True)
-            else:
-                df["confirmed"] = self.confirmed[(country, state)]
-                df["deaths"] = self.deaths[(country, state)]
-                df["recovered"] = self.recovered[(country, state)]
+            df["confirmed"] = self.confirmed[(country, state)]
+            df["deaths"] = self.deaths[(country, state)]
+            df["recovered"] = self.recovered[(country, state)]
         df.index.name = "date"
 
         return self.filter_date(df, begin_date, end_date)
@@ -275,11 +274,10 @@ class JHU(Retrieval):
 
         if country is None:
             df[value] = orig.sum(axis=1, skipna=True)
+        elif state is None:
+            df[value] = getattr(self, value)[country].sum(axis=1, skipna=True)
         else:
-            if state is None:
-                df[value] = getattr(self, value)[country].sum(axis=1, skipna=True)
-            else:
-                df[value] = getattr(self, value)[(country, state)]
+            df[value] = getattr(self, value)[(country, state)]
         df.index.name = "date"
 
         df = self.filter_date(df, data_begin - datetime.timedelta(days=1), data_end)
@@ -348,11 +346,10 @@ class JHU(Retrieval):
         orig = getattr(self, value)
         if country is None:
             df[value] = getattr(self, value).sum(axis=1, skipna=True)
+        elif state is None:
+            df[value] = getattr(self, value)[country].sum(axis=1, skipna=True)
         else:
-            if state is None:
-                df[value] = getattr(self, value)[country].sum(axis=1, skipna=True)
-            else:
-                df[value] = getattr(self, value)[(country, state)]
+            df[value] = getattr(self, value)[(country, state)]
         df.index.name = "date"
         df = self.filter_date(df, data_begin, data_end)
         return df[value]
@@ -410,9 +407,7 @@ class JHU(Retrieval):
             + list(self.deaths.columns)
             + list(self.recovered.columns)
         )
-        df = pd.DataFrame(all_entrys, columns=["country", "state"])
-
-        return df
+        return pd.DataFrame(all_entrys, columns=["country", "state"])
 
     # ------------------------------------------------------------------------------ #
     # Helper methods, overload from the base class
@@ -431,7 +426,7 @@ class JHU(Retrieval):
         finally:
             # We save it to the local files
             # self.data._save_to_local()
-            log.info(f"Successfully downloaded new files.")
+            log.info("Successfully downloaded new files.")
 
     def _local_helper(self):
         """
@@ -446,7 +441,7 @@ class JHU(Retrieval):
                 ],
                 **self.kwargs,
             )
-            log.info(f"Successfully loaded data from local")
+            log.info("Successfully loaded data from local")
             return True
         except Exception as e:
             log.info(f"Failed to load local files! {e} Trying fallbacks!")

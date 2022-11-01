@@ -116,7 +116,7 @@ class Ireland(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -189,7 +189,7 @@ class Ireland(Retrieval):
 
         if value == "confirmed":
             column = "TotalConfirmedCovidCases"
-        if value == "hospitalized":
+        elif value == "hospitalized":
             column = "HospitalisedCovidCases"
         if age_group is None:
             return self.data[column][data_begin:data_end]
@@ -199,10 +199,14 @@ class Ireland(Retrieval):
         if value == "confirmed":
             if num1 == "0" and num2 == "4":
                 return self.data[["Aged1", "Aged1to4"]].sum(axis=1)[data_begin:data_end]
-            if num1 == "65":
-                return self.data["Aged65up"][data_begin:data_end]
             else:
-                return self.data["Aged" + num1 + "to" + num2][data_begin:data_end]
+                return (
+                    self.data["Aged65up"][data_begin:data_end]
+                    if num1 == "65"
+                    else self.data["Aged" + num1 + "to" + num2][
+                        data_begin:data_end
+                    ]
+                )
 
         if value == "hospitalized":
             if num1 == "65":

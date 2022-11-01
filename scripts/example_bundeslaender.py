@@ -10,6 +10,7 @@
     
     ## Importing modules
 """
+
 import datetime
 import sys
 import pandas as pd
@@ -194,7 +195,7 @@ var_names = {
 }
 
 # Plots violin plots
-for var_name in var_names.keys():
+for var_name in var_names:
     f, ax = plt.subplots()
     ax.violinplot(trace[var_name], showextrema=False, vert=False, showmedians=True)
     ax.set_yticks(np.arange(1, 17))

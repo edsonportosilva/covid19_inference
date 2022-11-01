@@ -96,9 +96,7 @@ def hierarchical_normal(
         )
 
     X = pm.Normal(name_L1, mu=pr_mean, sigma=pr_sigma)
-    phi = pm.Normal(
-        name_L2 + "_raw_", mu=0, sigma=1, shape=shape
-    )  # (1-w**2)*sigma_X+1*w**2, shape=len_Y)
+    phi = pm.Normal(f"{name_L2}_raw_", mu=0, sigma=1, shape=shape)
     Y = X + phi * sigma_Y
     pm.Deterministic(name_L2, Y)
 
@@ -116,13 +114,20 @@ def hierarchical_beta(name, name_sigma, pr_mean, pr_sigma, len_L2, model=None):
         Y = pm.Beta(name, alpha=pr_mean / pr_sigma, beta=1 / pr_sigma * (1 - pr_mean))
         X = None
     else:
-        sigma_Y = pm.HalfCauchy(name_sigma + "_hc_L2", beta=pr_sigma)
+        sigma_Y = pm.HalfCauchy(f"{name_sigma}_hc_L2", beta=pr_sigma)
         X = pm.Beta(
-            name + "_hc_L1", alpha=pr_mean / pr_sigma, beta=1 / pr_sigma * (1 - pr_mean)
+            f"{name}_hc_L1",
+            alpha=pr_mean / pr_sigma,
+            beta=1 / pr_sigma * (1 - pr_mean),
         )
+
         Y = pm.Beta(
-            name + "_hc_L2", alpha=X / sigma_Y, beta=1 / sigma_Y * (1 - X), shape=len_L2
+            f"{name}_hc_L2",
+            alpha=X / sigma_Y,
+            beta=1 / sigma_Y * (1 - X),
+            shape=len_L2,
         )
+
 
     return Y, X
 

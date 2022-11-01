@@ -110,7 +110,7 @@ class Portugal(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -184,7 +184,7 @@ class Portugal(Retrieval):
 
         if value == "confirmed":
             column = "cumulative_cases"
-        if value == "deaths":
+        elif value == "deaths":
             column = "cumulative_deaths"
         if age_group is None:
             return self.data[column][data_begin:data_end]
@@ -202,13 +202,12 @@ class Portugal(Retrieval):
                 return df
             if int(num1) > 80:
                 return pd.DataFrame()
-            else:
-                df = self.data[
-                    [f"confirmados_{num1}_{num2}_m", f"confirmados_{num1}_{num2}_f"]
-                ].sum(axis=1)[data_begin:data_end]
-                df = pd.DataFrame(df)
-                df.columns = [("Portugal", age_group)]
-                return df
+            df = self.data[
+                [f"confirmados_{num1}_{num2}_m", f"confirmados_{num1}_{num2}_f"]
+            ].sum(axis=1)[data_begin:data_end]
+            df = pd.DataFrame(df)
+            df.columns = [("Portugal", age_group)]
+            return df
 
         if value == "deaths":
             if num1 == "80":
@@ -220,13 +219,12 @@ class Portugal(Retrieval):
                 return df
             if int(num1) > 80:
                 return pd.DataFrame()
-            else:
-                df = self.data[
-                    [f"obitos_{num1}_{num2}_m", f"obitos_{num1}_{num2}_f"]
-                ].sum(axis=1)[data_begin:data_end]
-                df = pd.DataFrame(df)
-                df.columns = [("Portugal", age_group)]
-                return df
+            df = self.data[
+                [f"obitos_{num1}_{num2}_m", f"obitos_{num1}_{num2}_f"]
+            ].sum(axis=1)[data_begin:data_end]
+            df = pd.DataFrame(df)
+            df.columns = [("Portugal", age_group)]
+            return df
 
     def get_new(
         self,

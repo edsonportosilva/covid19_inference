@@ -101,7 +101,7 @@ class OxCGRT(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -151,11 +151,12 @@ class OxCGRT(Retrieval):
             : dict
         """
 
-        ret = dict()
-        ret["containment and closure policies"] = []
-        ret["economic policies"] = []
-        ret["health system policies"] = []
-        ret["miscellaneous policies"] = []
+        ret = {
+            "containment and closure policies": [],
+            "economic policies": [],
+            "health system policies": [],
+            "miscellaneous policies": [],
+        }
 
         for policy in self.data.columns:
             if (

@@ -41,10 +41,11 @@ def get_start_points(trace, trace_az, frames_start=None, SD_chain_logl=2.5):
     keep_chains = logl_mean >= logl_thr
     log.info(f"Num chains kept: {np.sum(keep_chains)}/{n_chains}")
 
-    start_points = []
-    for i, keep_chain in enumerate(keep_chains):
-        if keep_chain:
-            start_points.append(trace.point(-1, chain=i))
+    start_points = [
+        trace.point(-1, chain=i)
+        for i, keep_chain in enumerate(keep_chains)
+        if keep_chain
+    ]
 
     return start_points, logl_mean[keep_chains]
 
@@ -118,14 +119,13 @@ def robust_sample(
                     **kwargs,
                 )
             except RuntimeError as error:
-                if i < 10:
-                    i += 1
-                    log.warning(f"Tuning lead to a nan error in one chain, "
-                                f"trying again (try no {i}).")
-                    continue
-
-                else:
+                if i >= 10:
                     raise error
+                i += 1
+                log.warning(f"Tuning lead to a nan error in one chain, "
+                            f"trying again (try no {i}).")
+                continue
+
             i = 1000
 
         trace_tuning_az = az.from_pymc3(trace_tuning, model=model, save_warmup=True)

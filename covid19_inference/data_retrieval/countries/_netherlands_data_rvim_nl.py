@@ -104,7 +104,7 @@ class Netherlands(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -176,9 +176,9 @@ class Netherlands(Retrieval):
         else:
             df = self.data
 
-        if value == "deaths":
+        if header == "deaths":
             df = df.loc[df["Deceased"] == "Yes"]
-        if value == "hospitalized":
+        elif header == "hospitalized":
             df = df.loc[df["Hospital_admission"] == "Yes"]
 
         ret = pd.DataFrame()
