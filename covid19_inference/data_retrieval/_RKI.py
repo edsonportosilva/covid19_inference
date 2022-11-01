@@ -117,7 +117,7 @@ class RKI(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -160,80 +160,78 @@ class RKI(Retrieval):
             json_data["features"][i]["attributes"]["IdLandkreis"] for i in range(n_data)
         ]
 
-        # If the number of landkreise is smaller than landkreise_max, uses local copy (query system can behave weirdly during updates)
-        if n_data >= landkreise_max:
-            log.info(f"Downloading {n_data} unique Landkreise. May take a while.\n")
-            df_keys = [
-                "IdBundesland",
-                "Bundesland",
-                "Landkreis",
-                "Altersgruppe",
-                "Geschlecht",
-                "AnzahlFall",
-                "AnzahlTodesfall",
-                "ObjectId",
-                "IdLandkreis",
-                "Datenstand",
-                "NeuerFall",
-                "NeuerTodesfall",
-                "NeuGenesen",
-                "AnzahlGenesen",
-                "date",
-                "date_ref",
-            ]
-
-            df = pd.DataFrame(columns=df_keys)
-
-            # Fills DF with data from all landkreise
-            for idlandkreis in unique_ids:
-
-                url_str = (
-                    "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0//query?where=IdLandkreis%3D"
-                    + idlandkreis
-                    + "&objectIds=&time=&resultType=none&outFields=Bundesland%2C+Landkreis%2C+IdBundesland%2C+ObjectId%2C+IdLandkreis%2C+Altersgruppe%2C+Geschlecht%2C+AnzahlFall%2C+AnzahlTodesfall%2C+Meldedatum%2C+NeuerFall%2C+Refdatum%2C+Datenstand%2C+NeuGenesen%2C+AnzahlGenesen&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token="
-                )
-
-                count_try = 0
-
-                while count_try < try_max:
-                    try:
-                        with urllib.request.urlopen(url_str) as url:
-                            json_data = json.loads(url.read().decode())
-
-                        n_data = len(json_data["features"])
-
-                        if n_data > 5000:
-                            raise ValueError("Query limit exceeded")
-
-                        data_flat = [
-                            json_data["features"][i]["attributes"]
-                            for i in range(n_data)
-                        ]
-
-                        break
-
-                    except:
-                        count_try += 1
-
-                if count_try == try_max:
-                    raise ValueError("Maximum limit of tries exceeded.")
-
-                df_temp = pd.DataFrame(data_flat)
-
-                # Very inneficient, but it will do
-                df = pd.concat([df, df_temp], ignore_index=True)
-
-            df["date"] = df["Meldedatum"].apply(
-                lambda x: datetime.datetime.fromtimestamp(x / 1e3)
-            )
-            df["date_ref"] = df["Refdatum"].apply(
-                lambda x: datetime.datetime.fromtimestamp(x / 1e3)
-            )
-            df = df.drop(columns="Meldedatum")
-            df = df.drop(columns="Refdatum")
-
-        else:
+        if n_data < landkreise_max:
             raise RuntimeError("Invalid response from REST api")
+
+        log.info(f"Downloading {n_data} unique Landkreise. May take a while.\n")
+        df_keys = [
+            "IdBundesland",
+            "Bundesland",
+            "Landkreis",
+            "Altersgruppe",
+            "Geschlecht",
+            "AnzahlFall",
+            "AnzahlTodesfall",
+            "ObjectId",
+            "IdLandkreis",
+            "Datenstand",
+            "NeuerFall",
+            "NeuerTodesfall",
+            "NeuGenesen",
+            "AnzahlGenesen",
+            "date",
+            "date_ref",
+        ]
+
+        df = pd.DataFrame(columns=df_keys)
+
+        # Fills DF with data from all landkreise
+        for idlandkreis in unique_ids:
+
+            url_str = (
+                "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0//query?where=IdLandkreis%3D"
+                + idlandkreis
+                + "&objectIds=&time=&resultType=none&outFields=Bundesland%2C+Landkreis%2C+IdBundesland%2C+ObjectId%2C+IdLandkreis%2C+Altersgruppe%2C+Geschlecht%2C+AnzahlFall%2C+AnzahlTodesfall%2C+Meldedatum%2C+NeuerFall%2C+Refdatum%2C+Datenstand%2C+NeuGenesen%2C+AnzahlGenesen&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token="
+            )
+
+            count_try = 0
+
+            while count_try < try_max:
+                try:
+                    with urllib.request.urlopen(url_str) as url:
+                        json_data = json.loads(url.read().decode())
+
+                    n_data = len(json_data["features"])
+
+                    if n_data > 5000:
+                        raise ValueError("Query limit exceeded")
+
+                    data_flat = [
+                        json_data["features"][i]["attributes"]
+                        for i in range(n_data)
+                    ]
+
+                    break
+
+                except:
+                    count_try += 1
+
+            if count_try == try_max:
+                raise ValueError("Maximum limit of tries exceeded.")
+
+            df_temp = pd.DataFrame(data_flat)
+
+            # Very inneficient, but it will do
+            df = pd.concat([df, df_temp], ignore_index=True)
+
+        df["date"] = df["Meldedatum"].apply(
+            lambda x: datetime.datetime.fromtimestamp(x / 1e3)
+        )
+        df["date_ref"] = df["Refdatum"].apply(
+            lambda x: datetime.datetime.fromtimestamp(x / 1e3)
+        )
+        df = df.drop(columns="Meldedatum")
+        df = df.drop(columns="Refdatum")
 
         return df
 
@@ -297,16 +295,12 @@ class RKI(Retrieval):
         elif bundesland is None and landkreis is not None:
             level = "Landkreis"
             filter_value = landkreis
-        elif bundesland is not None and landkreis is not None:
+        elif bundesland is not None:
             raise ValueError("bundesland and landkreis cannot be simultaneously set.")
 
-        # ------------------------------------------------------------------------------ #
-        # Retrieve data and filter it
-        # ------------------------------------------------------------------------------ #
-        df = self.filter(
+        return self.filter(
             data_begin, data_end, value, date_type, level, filter_value, age_group
         )
-        return df
 
     def get_new(
         self,
@@ -367,7 +361,7 @@ class RKI(Retrieval):
         elif bundesland is None and landkreis is not None:
             level = "Landkreis"
             filter_value = landkreis
-        elif bundesland is not None and landkreis is not None:
+        elif bundesland is not None:
             raise ValueError("bundesland and landkreis cannot be simultaneously set.")
 
         if data_begin is None:

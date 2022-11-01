@@ -109,7 +109,7 @@ class Switzerland(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -178,7 +178,7 @@ class Switzerland(Retrieval):
         # Check for tests since the data is structured another way
         if value == "confirmed":
             column = "NewConfCases"
-        if value == "deaths":
+        elif value == "deaths":
             column = "NewDeaths"
 
         if age_group is None:

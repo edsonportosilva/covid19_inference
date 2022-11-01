@@ -100,7 +100,7 @@ class OWD(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -173,11 +173,11 @@ class OWD(Retrieval):
             raise ValueError("No valid value given! " + value)
         if value == "confirmed":
             filter_value = "total_cases"
-        if value == "deaths":
+        elif value == "deaths":
             filter_value = "total_deaths"
-        if value == "tests":
+        elif value == "tests":
             filter_value = "total_tests"
-        if value == "vacinations":
+        elif value == "vacinations":
             filter_value = "total_vaccinations"
         return self._filter(
             value=filter_value,
@@ -218,11 +218,11 @@ class OWD(Retrieval):
             raise ValueError("No valid value given! " + value)
         if value == "confirmed":
             filter_value = "new_cases"
-        if value == "deaths":
+        elif value == "deaths":
             filter_value = "new_deaths"
-        if value == "tests":
+        elif value == "tests":
             filter_value = "new_tests"
-        if value == "vacinations":
+        elif value == "vacinations":
             filter_value = "new_vaccinations"
         return self._filter(
             value=filter_value,

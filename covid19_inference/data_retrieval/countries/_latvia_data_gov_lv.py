@@ -64,9 +64,7 @@ class Latvia(Retrieval):
         """
         Kwargs for pandas read csv
         """
-        kwargs = {}  # Surpress warning
-        kwargs["encoding"] = "cp1252"
-        kwargs["sep"] = ";"
+        kwargs = {"encoding": "cp1252", "sep": ";"}
         """
         fallback array can be anything a filepath or callable methods
         """
@@ -115,7 +113,7 @@ class Latvia(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
         # ------------------------------------------------------------------------------ #
@@ -229,9 +227,9 @@ class Latvia(Retrieval):
         # ------------------------------------------------------------------------------ #
         if value == "confirmed":
             column = "cases"
-        if value == "deaths":
+        elif value == "deaths":
             column = "deaths"
-        if value == "tests":
+        elif value == "tests":
             column = "tests"
 
         df = self.data
@@ -254,13 +252,12 @@ class Latvia(Retrieval):
             return df
         if int(num1) > 80:
             return pd.DataFrame()
-        else:
-            df = df["ApstiprinatiVecGr_" + num1 + "-" + num2 + "Gadi"][
-                data_begin:data_end
-            ]
-            df = pd.DataFrame(df)
-            df.columns = [("Latvia", age_group)]
-            return df
+        df = df["ApstiprinatiVecGr_" + num1 + "-" + num2 + "Gadi"][
+            data_begin:data_end
+        ]
+        df = pd.DataFrame(df)
+        df.columns = [("Latvia", age_group)]
+        return df
 
     def __get_first_date(self):
         return self.data.index.min()

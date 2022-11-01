@@ -268,8 +268,7 @@ class Cov19Model(Model):
             easy function to return the names of these function that's why we
             Get the names like that.
         """
-        varnames = [str(x).replace("_log__", "") for x in self.free_RVs]
-        return varnames
+        return [str(x).replace("_log__", "") for x in self.free_RVs]
 
 
 def modelcontext(model):
@@ -277,9 +276,7 @@ def modelcontext(model):
         return the given model or try to find it in the context if there was
         none supplied.
     """
-    if model is None:
-        return Cov19Model.get_context()
-    return model
+    return Cov19Model.get_context() if model is None else model
 
 
 def set_missing_priors_with_default(priors_dict, default_priors):

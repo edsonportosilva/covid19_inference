@@ -134,7 +134,7 @@ class Belgium(Retrieval):
         # ------------------------------------------------------------------------------ #
         # 2 Save local
         # ------------------------------------------------------------------------------ #
-        self._save_to_local() if not retrieved_local else None
+        None if retrieved_local else self._save_to_local()
 
         # ------------------------------------------------------------------------------ #
         # 3 Convert to useable format
@@ -269,7 +269,7 @@ class Belgium(Retrieval):
         finally:
             # We save it to the local files
             # self.data._save_to_local()
-            log.info(f"Successfully downloaded new files.")
+            log.info("Successfully downloaded new files.")
 
     def _local_helper(self):
         """

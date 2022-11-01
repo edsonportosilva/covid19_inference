@@ -32,12 +32,11 @@ except EnvironmentError:
     pass
 else:
     VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
-    mo = re.search(VSRE, verstrline, re.M)
-    if mo:
-        verstr = mo.group(1)
+    if mo := re.search(VSRE, verstrline, re.M):
+        verstr = mo[1]
     else:
         raise RuntimeError("unable to find version in covid19_inference/_version.py")
-print("sphinx found version: {}".format(verstr))
+print(f"sphinx found version: {verstr}")
 # The short X.Y version
 version = verstr
 # The full version, including alpha/beta/rc tags
@@ -209,4 +208,5 @@ autodoc_member_order = "bysource"
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True
 todo_include_todos = True

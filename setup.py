@@ -15,9 +15,8 @@ except EnvironmentError:
     pass
 else:
     VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
-    mo = re.search(VSRE, verstrline, re.M)
-    if mo:
-        verstr = mo.group(1)
+    if mo := re.search(VSRE, verstrline, re.M):
+        verstr = mo[1]
     else:
         raise RuntimeError("unable to find version in covid19_inference/_version.py")
 

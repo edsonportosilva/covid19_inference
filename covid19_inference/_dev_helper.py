@@ -74,7 +74,7 @@ def create_example_instance(num_change_points=3):
             pr_sigma_lambda=1,
         ),
     ]
-    change_points = change_points[0:num_change_points]
+    change_points = change_points[:num_change_points]
 
     params_model = dict(
         new_cases_obs=new_cases_obs,
